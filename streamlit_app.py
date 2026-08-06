@@ -161,27 +161,95 @@ st.set_page_config(
     page_icon="📄",
     layout="wide"
 )
+st.markdown("""
+<style>
 
-st.title("📄 PDF RAG Assistant")
+.main {
+    padding-top: 2rem;
+}
 
-st.markdown(
-    "Ask questions about your PDF using **Google Gemini + FAISS**."
-)
+.block-container {
+    max-width: 950px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+h1 {
+    text-align: center;
+    color: #2563EB;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #111827;
+    color: white;
+
+}
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+    color: white !important;
+}
+
+.stButton > button {
+    width: 100%;
+    border-radius: 10px;
+    height: 3em;
+    font-weight: bold;
+}
+
+section[data-testid="stSidebar"] .stButton > button {
+    background-color: #2563EB;
+    color: white !important;
+    border: none;
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #1D4ED8;
+    color: white !important;
+}
+
+.stTextInput input {
+    border-radius: 10px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+st.title("📄 PDF AI Assistant")
+
+st.caption("Chat with your PDF using Retrieval-Augmented Generation (RAG).")
+
+
+
 
 # Sidebar
 with st.sidebar:
 
-    st.header("Settings")
+    st.header("⚙️ Settings")
 
     pdf_path = st.text_input(
         "PDF Path",
         DEFAULT_PDF
     )
 
-    if st.button("Load PDF"):
-
+    if st.button("📂 Load PDF"):
         st.session_state["load_pdf"] = True
 
+    st.divider()
+
+    if st.button("🗑️ New Chat"):
+        st.session_state.messages = []
+        st.rerun()
+
+    st.divider()
+
+    st.markdown("### ⚡ Powered by")
+
+    st.markdown("""
+- 🤖 Google Gemini
+- 🦜 LangChain
+- 📚 FAISS
+""")
 # Initialize
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -214,11 +282,14 @@ if st.session_state.get("load_pdf"):
     st.success("PDF Loaded Successfully!")
 
 # Question
+st.subheader("💬 Chat")
+
 question = st.text_input(
-    "Ask a Question"
+    "Ask a Question",
+    placeholder="Type your question here..."
 )
 
-if st.button("Get Answer"):
+if st.button("🤖 Ask AI"):
 
     if "vector_db" not in st.session_state:
 
