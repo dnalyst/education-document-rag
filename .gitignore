@@ -16,3 +16,6 @@ __pycache__/
 
 # Windows
 Thumbs.db
+
+# Local FAISS Vector Store
+vector_store/

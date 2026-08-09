@@ -12,7 +12,7 @@ from langchain_community.vectorstores import FAISS
 # Configuration
 # ==========================================================
 
-DEFAULT_PDF = "data/Microsoft Certified Azure F_ (Z-Library)-1.pdf"
+DEFAULT_PDF = "data/UDISE_2025_26_Existing_Structure.pdf"
 VECTOR_STORE_PATH = "vector_store"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 GEMINI_MODEL = "gemini-flash-latest"
@@ -128,24 +128,39 @@ def ask_question(client, vector_db, question):
         k=3
     )
 
-    context = "\n\n".join(
-        doc.page_content
-        for doc in docs
-    )
+    context_parts = []
+
+    for doc in docs:
+        page_number = doc.metadata.get("page", "Unknown")
+        context_parts.append(
+        f"[Page {page_number + 1}]\n{doc.page_content}"
+        )
+
+    context = "\n\n".join(context_parts)
 
     prompt = f"""
-You are an AI assistant.
+You are an education-data document assistant.
 
-Answer ONLY using the context below.
+Your task is to answer the user's question using ONLY the
+retrieved content from the provided UDISE+ document.
 
-If the answer is not present in the context, reply:
+Rules:
+1. Do not use outside knowledge.
+2. Do not invent statistics, figures, rankings, trends, or claims.
+3. If the retrieved context does not contain enough information
+   to answer the question, say:
+   "I could not find enough information to answer this from
+   the provided UDISE+ document."
+4. When the document provides a specific figure or statistic,
+   reproduce it accurately.
+5. Keep the answer clear and concise.
+6. If useful, mention the relevant page number from the retrieved
+   document.
 
-"I could not find the answer in the provided document."
-
-Context:
+Retrieved context:
 {context}
 
-Question:
+User question:
 {question}
 """
     
@@ -160,6 +175,14 @@ Question:
         print("Assistant")
         print("=" * 60)
         print(response.text)
+
+        print("\n" + "-" * 60)
+        print("Retrieved Sources")
+        print("-" * 60)
+
+        for doc in docs:
+            page_number = doc.metadata.get("page", "Unknown")
+            print(f"Page {page_number + 1}")
 
     except Exception as e:
 
@@ -183,19 +206,9 @@ def main():
     embeddings = load_embedding_model()
 
     # Select PDF
-    pdf_path = input(
-        "\nEnter PDF path (Press Enter to use default): "
-    ).strip()
+    pdf_path = DEFAULT_PDF
 
-    if not pdf_path:
-        pdf_path = DEFAULT_PDF
-
-    print(f"\nUsing PDF: {pdf_path}")
-
-    if not os.path.exists(pdf_path):
-        raise FileNotFoundError(
-            f"PDF not found: {pdf_path}"
-        )
+    print(f"\nUsing document: {pdf_path}")
 
     # Check whether vector database already exists
     faiss_file = os.path.join(

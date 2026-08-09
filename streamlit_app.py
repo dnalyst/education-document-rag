@@ -54,7 +54,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-DEFAULT_PDF = "data/Microsoft Certified Azure F_ (Z-Library)-1.pdf"
+DEFAULT_PDF = "data/UDISE_2025_26_Existing_Structure.pdf"
 
 VECTOR_STORE_PATH = "vector_store"
 
